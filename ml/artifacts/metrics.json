@@ -1,0 +1,84 @@
+{
+  "run": "scenario_v1",
+  "thresholds": {
+    "run": "scenario_v1",
+    "temperature": 1.2379,
+    "min_conf": 0.84,
+    "multi_conf": 0.2,
+    "target_confident_accuracy": 0.95,
+    "fit_on": "val split, seen stress conditions pooled",
+    "classes": [
+      "healthy",
+      "leaf_miner",
+      "rust",
+      "phoma",
+      "cercospora"
+    ],
+    "rule": [
+      "confident if top1 >= min_conf",
+      "possibly_multiple if top1 and top2 are diseases, top2 >= multi_conf and top1 + top2 >= min_conf",
+      "otherwise not_sure"
+    ]
+  },
+  "calibration_val": {
+    "ece_seen_before": 0.03762318698031391,
+    "ece_seen_after": 0.02047725099681028,
+    "ece_unseen_before": 0.04717209495319856,
+    "ece_unseen_after": 0.039742574367554816
+  },
+  "test_clean": {
+    "acc": 0.8713,
+    "macro_f1": 0.8451,
+    "confident": 0.6535,
+    "possibly_multiple": 0.1683,
+    "not_sure": 0.1782,
+    "acc_when_confident": 0.9773,
+    "confident_wrong": 0.0149
+  },
+  "test_realistic_weekend_photo": {
+    "acc": 0.7772,
+    "macro_f1": 0.7505,
+    "confident": 0.4257,
+    "possibly_multiple": 0.198,
+    "not_sure": 0.3762,
+    "acc_when_confident": 0.9419,
+    "confident_wrong": 0.0248
+  },
+  "test_mean_seen_excl_clean": {
+    "acc": 0.8197,
+    "macro_f1": 0.7904,
+    "confident": 0.5644,
+    "possibly_multiple": 0.1761,
+    "not_sure": 0.2595,
+    "acc_when_confident": 0.9674,
+    "confident_wrong": 0.0163
+  },
+  "test_mean_unseen": {
+    "acc": 0.8251,
+    "macro_f1": 0.8082,
+    "confident": 0.5512,
+    "possibly_multiple": 0.203,
+    "not_sure": 0.2459,
+    "acc_when_confident": 0.9747,
+    "confident_wrong": 0.0132
+  },
+  "mixed_holdout_clean": {
+    "flagged (not_sure or possibly_multiple)": 0.8475,
+    "possibly_multiple": 0.5424,
+    "not_sure": 0.3051,
+    "top-1 is a present stress": 0.8814,
+    "confident and top-1 present": 0.1525
+  },
+  "mixed_holdout_realistic": {
+    "flagged (not_sure or possibly_multiple)": 0.8814,
+    "possibly_multiple": 0.3051,
+    "not_sure": 0.5763,
+    "top-1 is a present stress": 0.8305,
+    "confident and top-1 present": 0.0678
+  },
+  "notes": [
+    "Stress conditions are synthetic re-renders of BRACOL photos, not real home photos.",
+    "Correct = top-1 equals BRACOL's predominant stress; 38 of 202 test leaves carry a second stress.",
+    "Thresholds fit on validation only; test and mixed holdout were scored once."
+  ]
+}
