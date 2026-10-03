@@ -1,0 +1,6 @@
+data_raw/
+ml/cache/
+ml/checkpoints/
+.ipynb_checkpoints/
+__pycache__/
+.DS_Store
