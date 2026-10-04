@@ -1,0 +1,114 @@
+{
+  "chosen_variant": "fp16_weights",
+  "selection_rule": "smallest with val top-1 agreement >= 0.999 and status agreement >= 0.99",
+  "sizes_MB": {
+    "fp32": 6.102,
+    "int8_static": 1.873,
+    "int8_weights": 1.918,
+    "fp16_weights": 3.092,
+    "pytorch checkpoint": 6.224
+  },
+  "cpu_latency_ms_1_thread_laptop": {
+    "fp32": 8.31,
+    "int8_static": 3.3,
+    "int8_weights": 8.45,
+    "fp16_weights": 8.37
+  },
+  "parity_val": {
+    "fp32": {
+      "top1_agreement": 1.0,
+      "status_agreement": 1.0,
+      "mean_abs_prob_diff": 0.0,
+      "max_abs_prob_diff": 6e-06,
+      "max_sum_error": 0.0
+    },
+    "int8_static": {
+      "top1_agreement": 0.712347,
+      "status_agreement": 0.468566,
+      "mean_abs_prob_diff": 0.118528,
+      "max_abs_prob_diff": 0.931311,
+      "max_sum_error": 0.011765
+    },
+    "int8_weights": {
+      "top1_agreement": 0.999095,
+      "status_agreement": 0.988241,
+      "mean_abs_prob_diff": 0.001106,
+      "max_abs_prob_diff": 0.027955,
+      "max_sum_error": 0.0
+    },
+    "fp16_weights": {
+      "top1_agreement": 1.0,
+      "status_agreement": 0.999095,
+      "mean_abs_prob_diff": 0.000237,
+      "max_abs_prob_diff": 0.010015,
+      "max_sum_error": 0.0
+    }
+  },
+  "parity_test": {
+    "fp32": {
+      "top1_agreement": 1.0,
+      "status_agreement": 1.0,
+      "mean_abs_prob_diff": 0.0,
+      "max_abs_prob_diff": 7e-06,
+      "max_sum_error": 0.0
+    },
+    "int8_static": {
+      "top1_agreement": 0.70342,
+      "status_agreement": 0.480648,
+      "mean_abs_prob_diff": 0.116497,
+      "max_abs_prob_diff": 0.927177,
+      "max_sum_error": 0.011765
+    },
+    "int8_weights": {
+      "top1_agreement": 0.99685,
+      "status_agreement": 0.991449,
+      "mean_abs_prob_diff": 0.00108,
+      "max_abs_prob_diff": 0.016977,
+      "max_sum_error": 0.0
+    },
+    "fp16_weights": {
+      "top1_agreement": 0.99955,
+      "status_agreement": 0.9991,
+      "mean_abs_prob_diff": 0.000239,
+      "max_abs_prob_diff": 0.010436,
+      "max_sum_error": 0.0
+    }
+  },
+  "quality_test": {
+    "pytorch": {
+      "acc": 0.8258,
+      "macro_f1": 0.7986,
+      "acc_when_confident (seen)": 0.972,
+      "confident (seen)": 0.5755,
+      "confident_wrong": 0.0153
+    },
+    "fp32": {
+      "acc": 0.8258,
+      "macro_f1": 0.7986,
+      "acc_when_confident (seen)": 0.972,
+      "confident (seen)": 0.5755,
+      "confident_wrong": 0.0153
+    },
+    "int8_static": {
+      "acc": 0.6818,
+      "macro_f1": 0.6264,
+      "acc_when_confident (seen)": 0.9458,
+      "confident (seen)": 0.2853,
+      "confident_wrong": 0.0171
+    },
+    "int8_weights": {
+      "acc": 0.8272,
+      "macro_f1": 0.7995,
+      "acc_when_confident (seen)": 0.9731,
+      "confident (seen)": 0.5743,
+      "confident_wrong": 0.0149
+    },
+    "fp16_weights": {
+      "acc": 0.8263,
+      "macro_f1": 0.7991,
+      "acc_when_confident (seen)": 0.972,
+      "confident (seen)": 0.5755,
+      "confident_wrong": 0.0153
+    }
+  }
+}
