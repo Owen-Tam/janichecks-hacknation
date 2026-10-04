@@ -1,10 +1,12 @@
 import { Stack, useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { Alert, Image, ScrollView, StyleSheet, Text, View, Pressable } from 'react-native';
-import { CURRENT_USER_ID, FieldUser, getUsers, plantNameFor, saveUsers } from '../../lib/store';
+import { AdviceReport, DiagnosisLine } from '../../components/AdviceReport';
+import { CURRENT_USER_ID, FieldUser, PlantRecord, getUsers, plantNameFor, saveUsers } from '../../lib/store';
 
 export default function Records() {
   const [user, setUser] = useState<FieldUser | null>(null);
+  const [openId, setOpenId] = useState<string | null>(null);
 
   useFocusEffect(
     useCallback(() => {
@@ -27,6 +29,34 @@ export default function Records() {
   if (!user) return <View style={s.center}><Text style={s.muted}>Loading…</Text></View>;
 
   const sorted = [...user.records].sort((a, b) => (a.date < b.date ? 1 : -1));
+  const open = sorted.find((r) => r.id === openId) ?? null;
+
+  if (open) {
+    return (
+      <ScrollView style={s.container} contentContainerStyle={{ padding: 20, paddingBottom: 60 }}>
+        <Stack.Screen options={{ title: 'Record' }} />
+        {open.imageUri ? (
+          <Image source={{ uri: open.imageUri }} style={s.image} />
+        ) : (
+          <View style={[s.image, s.placeholder]}><Text style={{ fontSize: 34 }}>🌿</Text></View>
+        )}
+        <Text style={s.plantName}>{plantNameFor(user, open.plantId)}</Text>
+        <Text style={s.meta}>{open.date}</Text>
+        {!!open.note && <Text style={s.note}>{open.note}</Text>}
+        <View style={s.reportCard}>
+          {open.diagnosis ? (
+            <AdviceReport label={open.diagnosis.label} status={open.diagnosis.status} date={open.date} />
+          ) : (
+            <Text style={s.muted}>No diagnosis was saved with this record.</Text>
+          )}
+        </View>
+        <RecordActions record={open} onStatus={setStatus} />
+        <Pressable style={[s.btn, s.btnGhost, { marginTop: 12 }]} onPress={() => setOpenId(null)}>
+          <Text style={s.btnGhostText}>Back to records</Text>
+        </Pressable>
+      </ScrollView>
+    );
+  }
 
   return (
     <ScrollView style={s.container} contentContainerStyle={{ padding: 20, paddingBottom: 60 }}>
@@ -35,36 +65,50 @@ export default function Records() {
       {sorted.length === 0 && <Text style={s.muted}>No records yet. Take a photo to get started.</Text>}
       {sorted.map((r) => (
         <View key={r.id} style={s.card}>
-          {r.imageUri ? (
-            <Image source={{ uri: r.imageUri }} style={s.image} />
-          ) : (
-            <View style={[s.image, s.placeholder]}><Text style={{ fontSize: 34 }}>🌿</Text></View>
-          )}
-          <Text style={s.plantName}>{plantNameFor(user, r.plantId)}</Text>
-          <Text style={s.meta}>{r.date}</Text>
-          {!!r.note && <Text style={s.note}>{r.note}</Text>}
-
-          <View style={s.row}>
-            {r.status === 'pending' && (
-              <Pressable style={s.btn} onPress={() => setStatus(r.id, 'confirmed')}>
-                <Text style={s.btnText}>Confirm</Text>
-              </Pressable>
+          <Pressable onPress={() => setOpenId(r.id)}>
+            {r.imageUri ? (
+              <Image source={{ uri: r.imageUri }} style={s.image} />
+            ) : (
+              <View style={[s.image, s.placeholder]}><Text style={{ fontSize: 34 }}>🌿</Text></View>
             )}
-            {r.status === 'confirmed' && (
-              <>
-                <View style={[s.badge, s.badgeConfirmed]}><Text style={s.badgeText}>✓ Confirmed</Text></View>
-                <Pressable style={[s.btn, s.btnAlt]} onPress={() => setStatus(r.id, 'sent')}>
-                  <Text style={s.btnText}>Send to EO</Text>
-                </Pressable>
-              </>
-            )}
-            {r.status === 'sent' && (
-              <View style={[s.badge, s.badgeSent]}><Text style={s.badgeText}>📨 Sent to Extension Officer</Text></View>
-            )}
-          </View>
+            <Text style={s.plantName}>{plantNameFor(user, r.plantId)}</Text>
+            <Text style={s.meta}>{r.date}</Text>
+            {r.diagnosis && <DiagnosisLine label={r.diagnosis.label} status={r.diagnosis.status} />}
+            {!!r.note && <Text style={s.note}>{r.note}</Text>}
+          </Pressable>
+          <RecordActions record={r} onStatus={setStatus} />
         </View>
       ))}
     </ScrollView>
+  );
+}
+
+function RecordActions({
+  record,
+  onStatus,
+}: {
+  record: PlantRecord;
+  onStatus: (id: string, status: 'confirmed' | 'sent') => void;
+}) {
+  return (
+    <View style={s.row}>
+      {record.status === 'pending' && (
+        <Pressable style={s.btn} onPress={() => onStatus(record.id, 'confirmed')}>
+          <Text style={s.btnText}>Confirm</Text>
+        </Pressable>
+      )}
+      {record.status === 'confirmed' && (
+        <>
+          <View style={[s.badge, s.badgeConfirmed]}><Text style={s.badgeText}>✓ Confirmed</Text></View>
+          <Pressable style={[s.btn, s.btnAlt]} onPress={() => onStatus(record.id, 'sent')}>
+            <Text style={s.btnText}>Send to EO</Text>
+          </Pressable>
+        </>
+      )}
+      {record.status === 'sent' && (
+        <View style={[s.badge, s.badgeSent]}><Text style={s.badgeText}>📨 Sent to Extension Officer</Text></View>
+      )}
+    </View>
   );
 }
 
@@ -74,6 +118,7 @@ const s = StyleSheet.create({
   heading: { fontSize: 22, fontWeight: '700', color: '#3E5C3A', marginBottom: 16 },
   muted: { color: '#8A9A7C', fontSize: 14 },
   card: { backgroundColor: '#FFFFFF', borderRadius: 16, padding: 16, marginBottom: 14, borderWidth: 1, borderColor: '#DDE6C9' },
+  reportCard: { backgroundColor: '#FFFFFF', borderRadius: 16, padding: 16, marginTop: 14, borderWidth: 1, borderColor: '#DDE6C9' },
   image: { width: '100%', height: 150, borderRadius: 12, marginBottom: 12 },
   placeholder: { backgroundColor: '#EAF3DC', justifyContent: 'center', alignItems: 'center' },
   plantName: { fontSize: 17, fontWeight: '600', color: '#3E5C3A' },
@@ -82,7 +127,9 @@ const s = StyleSheet.create({
   row: { flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 12 },
   btn: { backgroundColor: '#7FB069', paddingVertical: 9, paddingHorizontal: 18, borderRadius: 12 },
   btnAlt: { backgroundColor: '#5C8A4D' },
+  btnGhost: { backgroundColor: '#EAF3DC', alignItems: 'center' },
   btnText: { color: '#FFFFFF', fontWeight: '600', fontSize: 14 },
+  btnGhostText: { color: '#3E5C3A', fontWeight: '600', fontSize: 14 },
   badge: { paddingVertical: 6, paddingHorizontal: 12, borderRadius: 999 },
   badgeConfirmed: { backgroundColor: '#EAF3DC' },
   badgeSent: { backgroundColor: '#D8E9C5' },

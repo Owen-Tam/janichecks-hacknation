@@ -1,11 +1,13 @@
 import { Stack, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { Image, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { AdviceReport, DiagnosisLine } from '../../components/AdviceReport';
 import { FieldUser, getUsers, plantNameFor } from '../../lib/store';
 
 export default function EoUserReport() {
   const { userId } = useLocalSearchParams<{ userId: string }>();
   const [user, setUser] = useState<FieldUser | null>(null);
+  const [openId, setOpenId] = useState<string | null>(null);
 
   useEffect(() => {
     getUsers().then((all) => setUser(all.find((u) => u.id === userId) ?? null));
@@ -15,6 +17,33 @@ export default function EoUserReport() {
 
   const sent = user.records.filter((r) => r.status === 'sent');
   const confirmed = user.records.filter((r) => r.status === 'confirmed').length;
+  const open = sent.find((r) => r.id === openId) ?? null;
+
+  if (open) {
+    return (
+      <ScrollView style={s.container} contentContainerStyle={{ padding: 20, paddingBottom: 60 }}>
+        <Stack.Screen options={{ title: `${user.name} — Record` }} />
+        {open.imageUri ? (
+          <Image source={{ uri: open.imageUri }} style={s.image} />
+        ) : (
+          <View style={[s.image, s.placeholder]}><Text style={{ fontSize: 30 }}>🌿</Text></View>
+        )}
+        <Text style={s.plantName}>{plantNameFor(user, open.plantId)}</Text>
+        <Text style={s.meta}>{open.date}</Text>
+        {!!open.note && <Text style={s.note}>{open.note}</Text>}
+        <View style={s.reportCard}>
+          {open.diagnosis ? (
+            <AdviceReport label={open.diagnosis.label} status={open.diagnosis.status} date={open.date} />
+          ) : (
+            <Text style={s.muted}>No diagnosis was saved with this record.</Text>
+          )}
+        </View>
+        <Pressable style={s.back} onPress={() => setOpenId(null)}>
+          <Text style={s.backText}>Back to report</Text>
+        </Pressable>
+      </ScrollView>
+    );
+  }
 
   return (
     <ScrollView style={s.container} contentContainerStyle={{ padding: 20, paddingBottom: 60 }}>
@@ -34,7 +63,7 @@ export default function EoUserReport() {
       <Text style={s.section}>Sent Records</Text>
       {sent.length === 0 && <Text style={s.muted}>No records sent yet.</Text>}
       {sent.map((r) => (
-        <View key={r.id} style={s.card}>
+        <Pressable key={r.id} style={s.card} onPress={() => setOpenId(r.id)}>
           {r.imageUri ? (
             <Image source={{ uri: r.imageUri }} style={s.image} />
           ) : (
@@ -45,8 +74,9 @@ export default function EoUserReport() {
             <View style={s.pill}><Text style={s.pillText}>📨 Sent</Text></View>
           </View>
           <Text style={s.meta}>{r.date}</Text>
+          {r.diagnosis && <DiagnosisLine label={r.diagnosis.label} status={r.diagnosis.status} />}
           {!!r.note && <Text style={s.note}>{r.note}</Text>}
-        </View>
+        </Pressable>
       ))}
     </ScrollView>
   );
@@ -65,6 +95,7 @@ const s = StyleSheet.create({
   section: { fontSize: 16, fontWeight: '700', color: '#3E5C3A', marginBottom: 12 },
   muted: { color: '#8A9A7C', fontSize: 14 },
   card: { backgroundColor: '#FFFFFF', borderRadius: 16, padding: 16, marginBottom: 14, borderWidth: 1, borderColor: '#DDE6C9' },
+  reportCard: { backgroundColor: '#FFFFFF', borderRadius: 16, padding: 16, marginTop: 14, borderWidth: 1, borderColor: '#DDE6C9' },
   image: { width: '100%', height: 140, borderRadius: 12, marginBottom: 12 },
   placeholder: { backgroundColor: '#EAF3DC', justifyContent: 'center', alignItems: 'center' },
   rowBetween: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
@@ -73,4 +104,6 @@ const s = StyleSheet.create({
   note: { fontSize: 13, color: '#5C6B52', marginTop: 6 },
   pill: { backgroundColor: '#D8E9C5', paddingVertical: 4, paddingHorizontal: 10, borderRadius: 999 },
   pillText: { fontSize: 12, fontWeight: '600', color: '#3E5C3A' },
+  back: { backgroundColor: '#EAF3DC', borderRadius: 12, paddingVertical: 12, alignItems: 'center', marginTop: 16 },
+  backText: { color: '#3E5C3A', fontWeight: '600' },
 });

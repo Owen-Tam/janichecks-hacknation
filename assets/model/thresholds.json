@@ -1,0 +1,20 @@
+{
+  "run": "scenario_v1",
+  "temperature": 1.2379,
+  "min_conf": 0.84,
+  "multi_conf": 0.2,
+  "target_confident_accuracy": 0.95,
+  "fit_on": "val split, seen stress conditions pooled",
+  "classes": [
+    "healthy",
+    "leaf_miner",
+    "rust",
+    "phoma",
+    "cercospora"
+  ],
+  "rule": [
+    "confident if top1 >= min_conf",
+    "possibly_multiple if top1 and top2 are diseases, top2 >= multi_conf and top1 + top2 >= min_conf",
+    "otherwise not_sure"
+  ]
+}
