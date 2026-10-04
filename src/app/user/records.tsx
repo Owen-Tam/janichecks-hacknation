@@ -62,7 +62,10 @@ export default function Records() {
                 </>
               )}
               {r.status === 'sent' && (
-                <View style={[s.badge, s.badgeSent]}><Text style={s.badgeText}>📨 Imetumwa kwa Afisa wa Ugani</Text></View>
+                <View style={[s.badge, s.badgeSent, { flexDirection: 'row', alignItems: 'center', gap: 6 }]}>
+                  <Image source={require('../../../assets/letter.png')} style={{ width: 28, height: 28 }} resizeMode="contain" />
+                  <Text style={[s.badgeText, { color: '#FFFFFF' }]}>Imetumwa kwa Afisa wa Ugani</Text>
+                </View>
               )}
             </View>
           </View>
@@ -76,7 +79,7 @@ const s = StyleSheet.create({
   center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   heading: { fontSize: 22, fontFamily: fonts.headingBold, color: '#3E5C3A', marginBottom: 16 },
   muted: { color: '#8A9A7C', fontSize: 14 },
-  card: { backgroundColor: '#FFFFFF', borderRadius: 16, padding: 16, marginBottom: 14, borderWidth: 1, borderColor: '#DDE6C9' },
+  card: { backgroundColor: '#F6F0DF', borderRadius: 16, padding: 16, marginBottom: 14, borderWidth: 1, borderColor: '#DDE6C9' },
   image: { width: '100%', height: 150, borderRadius: 12, marginBottom: 12 },
   placeholder: { backgroundColor: '#EAF3DC', justifyContent: 'center', alignItems: 'center' },
   plantName: { fontSize: 17, fontFamily: fonts.heading, color: '#3E5C3A' },
@@ -87,6 +90,6 @@ const s = StyleSheet.create({
   btnText: { color: '#3E5C3A', fontFamily: fonts.bodySemi, fontSize: 14 },
   badge: { paddingVertical: 6, paddingHorizontal: 12, borderRadius: 999 },
   badgeConfirmed: { backgroundColor: '#EAF3DC' },
-  badgeSent: { backgroundColor: '#D8E9C5' },
+  badgeSent: { backgroundColor: '#ECBA9A' },
   badgeText: { color: '#3E5C3A', fontFamily: fonts.bodySemi, fontSize: 13 },
 });
