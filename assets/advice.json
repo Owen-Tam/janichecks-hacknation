@@ -1,0 +1,124 @@
+{
+  "not_sure": {
+    "title": "Unsure",
+    "audio": "unsure",
+    "sections": [
+      {
+        "heading": "Next step",
+        "body": "I'm unsure about what this image shows. Please contact your extension officer.",
+        "audio": "unsure"
+      }
+    ]
+  },
+  "healthy": {
+    "title": "Healthy",
+    "audio": "healthy",
+    "sections": [
+      {
+        "heading": "Result",
+        "body": "This leaf shows that the plant is healthy.",
+        "audio": "healthy"
+      }
+    ]
+  },
+  "leaf_miner": {
+    "title": "Leaf miner",
+    "audio": "condition",
+    "sections": [
+      {
+        "heading": "Symptoms",
+        "body": "Tiny transparent, pale yellow, or whitish winding mines appear underneath the leaf epidermis, brown or dark necrotic spots on the upper leaf surface",
+        "audio": "symptoms"
+      },
+      {
+        "heading": "Early stage",
+        "body": "Prune lightly infested branches and clear away fallen leaves immediately. Install light traps at night to catch adult moths before they can lay eggs on the leaves.",
+        "audio": "early"
+      },
+      {
+        "heading": "Late stage",
+        "body": "Aggressively prune highly damaged branches to improve sunlight penetration and air circulation, which reduces the pest's preferred humid environment. Rake and deeply bury all fallen leaves",
+        "audio": "late"
+      }
+    ]
+  },
+  "rust": {
+    "title": "Leaf rust",
+    "audio": "condition",
+    "sections": [
+      {
+        "heading": "Symptoms",
+        "body": "irregular shaped spots on upper leaf surfaces, connected with yellow to orange powdery lesions on the lower leaf surfaces",
+        "audio": "symptoms"
+      },
+      {
+        "heading": "Early stage",
+        "body": "Thin out the coffee tree canopy and manage shade trees. Increasing sunlight and air circulation helps dry out leaves faster, preventing the moist conditions spores need to grow. Apply balanced fertilizers high in nitrogen and potassium.",
+        "audio": "early"
+      },
+      {
+        "heading": "Late stage",
+        "body": "Cut back severely defoliated or dying trees to force new, healthy vegetative growth. Safely remove and burn or deeply bury the heavily infected debris away from healthy plots.",
+        "audio": "late"
+      }
+    ]
+  },
+  "phoma": {
+    "title": "Phoma",
+    "audio": "condition",
+    "sections": [
+      {
+        "heading": "Symptoms",
+        "body": "dark lesions on young leaves, branch dieback, and flower or fruit decay",
+        "audio": "symptoms"
+      },
+      {
+        "heading": "Early stage",
+        "body": "Apply foliar fertilizers containing manganese, phosphorus (phosphites), and boron. Remove fallen leaf litter and debris to prevent the spores from splashing onto the leaves during rain",
+        "audio": "early"
+      },
+      {
+        "heading": "Late stage",
+        "body": "Prune away all dying branches and cut a few inches into healthy wood to ensure the infection is completely isolated. Safely burn the infected wood away from the plantation, and remember to disinfect the tools. Use systemic fungicides 3-4 times spaced 20 to 30 days apart.",
+        "audio": "late"
+      }
+    ],
+    "seasonal": {
+      "months": [4, 5],
+      "before": "Late stage",
+      "heading": "If detected in April/May",
+      "body": "Since it's the end of rainy season, only one or two sprays with contact fungicides are needed, keeping an interval of 30 days in between.",
+      "audio": "early_april"
+    }
+  },
+  "cercospora": {
+    "title": "Cercospora leaf spot",
+    "audio": "condition",
+    "sections": [
+      {
+        "heading": "Symptoms",
+        "body": "small spots on leaves that have a tan to light brown center with a distinct reddish-purple or dark brown border",
+        "audio": "symptoms"
+      },
+      {
+        "heading": "Early stage",
+        "body": "Apply copper-based fungicides (such as copper oxychloride or Kocide) to protect new foliage re-growth and uninfected berries, especially after pruning or during rainy periods. Prune dense branches to improve air circulation and reduce canopy humidity, and avoid overhead watering.",
+        "audio": "early"
+      },
+      {
+        "heading": "Late stage",
+        "body": "Remove and burn heavily infected twigs, branches, and affected berries. Then control weeds and avoid herbicide injury to reduce stress.",
+        "audio": "late"
+      }
+    ]
+  },
+  "unknown": {
+    "title": "Unknown",
+    "sections": [
+      {
+        "heading": "Result",
+        "body": "No advice is available for this result."
+      }
+    ]
+  }
+}
