@@ -34,41 +34,41 @@ export type FieldUser = {
   records: PlantRecord[];
 };
 
-const KEY = 'hacknation:data:v1';
+const KEY = 'hacknation:data:v2';
 
 const seed: FieldUser[] = [
   {
     id: 'u1',
     name: 'Asha Patel',
-    village: 'Greenfield',
-    crop: 'Rice',
+    village: 'Kijani',
+    crop: 'Mpunga',
     plants: [
-      { id: 'p1', name: 'Rice Plant A', species: 'Oryza sativa', identifiedAt: '2026-09-12' },
-      { id: 'p2', name: 'Rice Plant B', species: 'Oryza sativa', identifiedAt: '2026-09-20' },
+      { id: 'p1', name: 'Mmea wa Mpunga A', species: 'Oryza sativa', identifiedAt: '2026-09-12' },
+      { id: 'p2', name: 'Mmea wa Mpunga B', species: 'Oryza sativa', identifiedAt: '2026-09-20' },
     ],
     records: [
-      { id: 'r1', plantId: 'p1', imageUri: null, date: '2026-09-28', status: 'sent', note: 'Healthy leaves, good tillering.' },
-      { id: 'r2', plantId: 'p2', imageUri: null, date: '2026-09-30', status: 'confirmed', note: 'Slight yellowing on lower leaves.' },
-      { id: 'r3', plantId: 'p1', imageUri: null, date: '2026-10-02', status: 'pending', note: 'New photo taken today.' },
+      { id: 'r1', plantId: 'p1', imageUri: null, date: '2026-09-28', status: 'sent', note: 'Majani yenye afya, kupalilia vizuri.' },
+      { id: 'r2', plantId: 'p2', imageUri: null, date: '2026-09-30', status: 'confirmed', note: 'Majani ya chini yameanza kuwa ya manjano.' },
+      { id: 'r3', plantId: 'p1', imageUri: null, date: '2026-10-02', status: 'pending', note: 'Picha mpya imepigwa leo.' },
     ],
   },
   {
     id: 'u2',
     name: 'Bekele Abebe',
-    village: 'Riverside',
-    crop: 'Rice',
+    village: 'Kando ya Mto',
+    crop: 'Mpunga',
     plants: [
-      { id: 'p3', name: 'Field Rice 1', species: 'Oryza sativa', identifiedAt: '2026-09-05' },
+      { id: 'p3', name: 'Mpunga wa Shamba 1', species: 'Oryza sativa', identifiedAt: '2026-09-05' },
     ],
     records: [
-      { id: 'r4', plantId: 'p3', imageUri: null, date: '2026-10-01', status: 'sent', note: 'Possible brown spot fungus detected.' },
+      { id: 'r4', plantId: 'p3', imageUri: null, date: '2026-10-01', status: 'sent', note: 'Kuvu ya madoa ya kahawia kumeonekana.' },
     ],
   },
   {
     id: 'u3',
     name: 'Mei Lin',
-    village: 'Hilltop',
-    crop: 'Rice',
+    village: 'Kilele',
+    crop: 'Mpunga',
     plants: [],
     records: [],
   },
@@ -97,7 +97,7 @@ export async function updateUser(userId: string, fn: (u: FieldUser) => FieldUser
 }
 
 export function plantNameFor(user: FieldUser, plantId: string): string {
-  return user.plants.find((p) => p.id === plantId)?.name ?? 'Unknown plant';
+  return user.plants.find((p) => p.id === plantId)?.name ?? 'Mmea usiojulikana';
 }
 
 export const CURRENT_USER_ID = 'u1';
