@@ -24,7 +24,7 @@ export default function EoHome() {
                 <Text style={s.meta}>{u.village} · {u.crop}</Text>
               </View>
               <View style={[s.pill, sent > 0 ? s.pillHot : s.pillEmpty]}>
-                <Text style={s.pillText}>{sent} zimetumwa</Text>
+                <Text style={[s.pillText, sent === 0 && { color: '#3E5C3A' }]}>{sent} zimetumwa</Text>
               </View>
             </Pressable>
           );
@@ -42,7 +42,7 @@ const s = StyleSheet.create({
   name: { fontSize: 16, fontFamily: fonts.heading, color: '#3E5C3A' },
   meta: { fontSize: 12, color: '#8A9A7C', marginTop: 2 },
   pill: { paddingVertical: 5, paddingHorizontal: 12, borderRadius: 999 },
-  pillHot: { backgroundColor: '#CDE3B8' },
+  pillHot: { backgroundColor: '#ECBA9A' },
   pillEmpty: { backgroundColor: '#EEF2E2' },
-  pillText: { fontSize: 12, fontFamily: fonts.bodySemi, color: '#3E5C3A' },
+  pillText: { fontSize: 12, fontFamily: fonts.bodySemi, color: '#FFFFFF' },
 });

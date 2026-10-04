@@ -49,11 +49,11 @@ export default function EoUserReport() {
 
   return (
     <Bg>
-      <Stack.Screen options={{ title: `${user.name} — Ripoti` }} />
+      <Stack.Screen options={{ title: 'Ripoti ya Shamba' }} />
       <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 20, paddingBottom: 60 }}>
         <View style={s.reportHead}>
-          <Text style={s.reportTitle}>Ripoti ya Shamba</Text>
-          <Text style={s.reportMeta}>{user.name} · {user.village} · {user.crop}</Text>
+          <Text style={s.reportTitle}>{user.name}</Text>
+          <Text style={s.reportMeta}>{user.village} · {user.crop}</Text>
         </View>
 
         <View style={s.stats}>
@@ -62,31 +62,34 @@ export default function EoUserReport() {
           <View style={s.stat}><Text style={s.statNum}>{sent.length}</Text><Text style={s.statLabel}>Zimetumwa Kwako</Text></View>
         </View>
 
-      <Text style={s.section}>Sent Records</Text>
-      {sent.length === 0 && <Text style={s.muted}>No records sent yet.</Text>}
-      {sent.map((r) => (
-        <Pressable key={r.id} style={s.card} onPress={() => setOpenId(r.id)}>
-          {r.imageUri ? (
-            <Image source={{ uri: r.imageUri }} style={s.image} />
-          ) : (
-            <View style={[s.image, s.placeholder]}><Text style={{ fontSize: 30 }}>🌿</Text></View>
-          )}
-          <View style={s.rowBetween}>
-            <Text style={s.plantName}>{plantNameFor(user, r.plantId)}</Text>
-            <View style={s.pill}><Text style={s.pillText}>📨 Sent</Text></View>
+        <Text style={s.section}>Rekodi Zilizotumwa</Text>
+        {sent.length === 0 && <Text style={s.muted}>Hakuna rekodi zilizotumwa bado.</Text>}
+        {sent.map((r) => (
+          <View key={r.id} style={s.card}>
+            {r.imageUri ? (
+              <Image source={{ uri: r.imageUri }} style={s.image} />
+            ) : (
+              <View style={[s.image, s.placeholder]}><Text style={{ fontSize: 30 }}>🌿</Text></View>
+            )}
+            <View style={s.rowBetween}>
+              <Text style={s.plantName}>{plantNameFor(user, r.plantId)}</Text>
+              <View style={[s.pill, { flexDirection: 'row', alignItems: 'center', gap: 6 }]}>
+                <Image source={require('../../../assets/letter.png')} style={{ width: 26, height: 26 }} resizeMode="contain" />
+                <Text style={s.pillText}>Imetumwa</Text>
+              </View>
+            </View>
+            <Text style={s.meta}>{r.date}</Text>
+            {!!r.note && <Text style={s.note}>{r.note}</Text>}
           </View>
-          <Text style={s.meta}>{r.date}</Text>
-          {r.diagnosis && <DiagnosisLine label={r.diagnosis.label} status={r.diagnosis.status} />}
-          {!!r.note && <Text style={s.note}>{r.note}</Text>}
-        </Pressable>
-      ))}
-    </ScrollView>
+        ))}
+      </ScrollView>
+    </Bg>
   );
 }
 
 const s = StyleSheet.create({
   center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  reportHead: { backgroundColor: '#DA805B', borderRadius: 16, padding: 18, marginBottom: 16 },
+  reportHead: { backgroundColor: '#E19672', borderRadius: 16, padding: 18, marginBottom: 16 },
   reportTitle: { color: '#FFFFFF', fontSize: 20, fontFamily: fonts.headingBold },
   reportMeta: { color: '#EAF3DC', fontSize: 13, marginTop: 4 },
   stats: { flexDirection: 'row', gap: 10, marginBottom: 20 },
@@ -103,8 +106,6 @@ const s = StyleSheet.create({
   plantName: { fontSize: 16, fontFamily: fonts.heading, color: '#3E5C3A' },
   meta: { fontSize: 12, color: '#8A9A7C', marginTop: 2 },
   note: { fontSize: 13, color: '#5C6B52', marginTop: 6 },
-  pill: { backgroundColor: '#D8E9C5', paddingVertical: 4, paddingHorizontal: 10, borderRadius: 999 },
-  pillText: { fontSize: 12, fontWeight: '600', color: '#3E5C3A' },
-  back: { backgroundColor: '#EAF3DC', borderRadius: 12, paddingVertical: 12, alignItems: 'center', marginTop: 16 },
-  backText: { color: '#3E5C3A', fontWeight: '600' },
+  pill: { backgroundColor: '#ECBA9A', paddingVertical: 4, paddingHorizontal: 10, borderRadius: 999 },
+  pillText: { fontSize: 12, fontFamily: fonts.bodySemi, color: '#FFFFFF' },
 });
