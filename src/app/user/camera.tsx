@@ -3,13 +3,19 @@ import * as ImagePicker from 'expo-image-picker';
 import { router, Stack } from 'expo-router';
 import { useRef, useState } from 'react';
 import {
-  Alert, Image, Pressable, ScrollView, StyleSheet, Text, TextInput, View,
+  ActivityIndicator, Alert, Image, Pressable, ScrollView, StyleSheet, Text, TextInput, View,
 } from 'react-native';
-import Bg from '../../components/Bg';
-import { CURRENT_USER_ID, FieldUser, getUsers, Plant, saveUsers } from '../../lib/store';
+import { AdviceReport } from '../../components/AdviceReport';
+import { classifyLeaf, LeafPrediction } from '../../lib/leafModel';
 import { fonts } from '../../lib/theme';
+import Bg from '../../components/Bg';
+
+import { CURRENT_USER_ID, FieldUser, getUsers, Plant, saveUsers } from '../../lib/store';
 
 type Step = 'camera' | 'preview' | 'classify' | 'name' | 'existing';
+
+const newId = (prefix: string) => `${prefix}${Date.now()}`;
+const today = () => new Date().toISOString().slice(0, 10);
 
 export default function CameraScreen() {
   const [permission, requestPermission] = useCameraPermissions();
@@ -20,6 +26,26 @@ export default function CameraScreen() {
   const [name, setName] = useState('');
   const [note, setNote] = useState('');
   const [user, setUser] = useState<FieldUser | null>(null);
+  const [prediction, setPrediction] = useState<LeafPrediction | null>(null);
+  const [predictError, setPredictError] = useState<string | null>(null);
+
+  const latestUri = useRef<string | null>(null);
+
+  function snapshot(): Diagnosis | undefined {
+    if (!prediction) return undefined;
+    return { label: prediction.label, status: prediction.status };
+  }
+
+  function showPreview(uri: string) {
+    setPhotoUri(uri);
+    setStep('preview');
+    setPrediction(null);
+    setPredictError(null);
+    latestUri.current = uri;
+    classifyLeaf(uri)
+      .then((p) => { if (latestUri.current === uri) setPrediction(p); })
+      .catch((e) => { if (latestUri.current === uri) setPredictError(String(e?.message ?? e)); });
+  }
 
   async function ensureUser() {
     if (user) return user;
@@ -36,18 +62,12 @@ export default function CameraScreen() {
       return;
     }
     const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images'], quality: 0.7 });
-    if (!result.canceled && result.assets[0]) {
-      setPhotoUri(result.assets[0].uri);
-      setStep('preview');
-    }
+    if (!result.canceled && result.assets[0]) showPreview(result.assets[0].uri);
   }
 
   async function takePhoto() {
     const pic = await camRef.current?.takePictureAsync({ quality: 0.7 });
-    if (pic) {
-      setPhotoUri(pic.uri);
-      setStep('preview');
-    }
+    if (pic) showPreview(pic.uri);
   }
 
   async function saveNewPlant() {
@@ -56,8 +76,8 @@ export default function CameraScreen() {
     const u = all.find((x) => x.id === CURRENT_USER_ID);
     if (!u) return;
     const plantId = `p${Date.now()}`;
-    const plant: Plant = { id: plantId, name: name.trim(), species: 'Ihakikishwe', identifiedAt: new Date().toISOString().slice(0, 10) };
-    const rec = { id: `r${Date.now()}`, plantId, imageUri: photoUri, date: new Date().toISOString().slice(0, 10), status: 'pending' as const, note: note.trim() || 'Imeandikwa kutoka picha mpya.' };
+    const plant: Plant = { id: plantId, name: name.trim(), species: 'To be confirmed', identifiedAt: new Date().toISOString().slice(0, 10) };
+    const rec = { id: `r${Date.now()}`, plantId, imageUri: photoUri, date: new Date().toISOString().slice(0, 10), status: 'pending' as const, note: note.trim() || 'Logged from new photo.' };
     u.plants.push(plant);
     u.records.push(rec);
     await saveUsers(all);
@@ -69,7 +89,7 @@ export default function CameraScreen() {
     const all = await getUsers();
     const u = all.find((x) => x.id === CURRENT_USER_ID);
     if (!u) return;
-    u.records.push({ id: `r${Date.now()}`, plantId, imageUri: photoUri, date: new Date().toISOString().slice(0, 10), status: 'pending', note: note.trim() || 'Imeongezwa kwenye rekodi iliyopo.' });
+    u.records.push({ id: `r${Date.now()}`, plantId, imageUri: photoUri, date: new Date().toISOString().slice(0, 10), status: 'pending', note: note.trim() || 'Added to existing record.' });
     await saveUsers(all);
     done();
   }
@@ -107,15 +127,13 @@ export default function CameraScreen() {
   }
 
   if (step === 'preview' && photoUri) {
+    const ready = !!prediction || !!predictError;
     return (
-      <Bg>
-        <Stack.Screen options={{ title: 'Hakiki Picha' }} />
-        <View style={{ flex: 1 }}>
-          <Image source={{ uri: photoUri }} style={s.preview} />
-          <View style={s.row}>
-            <Pressable style={[s.btn, s.btnGhost]} onPress={() => setStep('camera')}><Text style={s.btnGhostText}>Piga Tena</Text></Pressable>
-            <Pressable style={s.btn} onPress={async () => { await ensureUser(); setStep('classify'); }}><Text style={s.btnText}>Tumia Picha</Text></Pressable>
-          </View>
+      <View style={s.container}>
+        <Image source={{ uri: photoUri }} style={s.preview} />
+        <View style={s.row}>
+          <Pressable style={[s.btn, s.btnGhost]} onPress={() => setStep('camera')}><Text style={s.btnGhostText}>Retake</Text></Pressable>
+          <Pressable style={s.btn} onPress={async () => { await ensureUser(); setStep('classify'); }}><Text style={s.btnText}>Use Photo</Text></Pressable>
         </View>
       </Bg>
     );
@@ -142,16 +160,13 @@ export default function CameraScreen() {
 
   if (step === 'name') {
     return (
-      <Bg>
-        <Stack.Screen options={{ title: 'Mmea Mpya' }} />
-        <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 24 }}>
-          <Text style={s.heading}>Ipe jina mmea mpya</Text>
-          <TextInput style={s.input} placeholder="Jina la mmea (k.m. Mmea wa Mpunga C)" placeholderTextColor="#A9B79B" value={name} onChangeText={setName} />
-          <TextInput style={s.input} placeholder="Maelezo ya hiari" placeholderTextColor="#A9B79B" value={note} onChangeText={setNote} />
-          <Pressable style={s.btnWide} onPress={saveNewPlant}><Text style={s.btnText}>Hifadhi Rekodi</Text></Pressable>
-          <Pressable style={[s.btnWide, s.btnGhost, { marginTop: 10 }]} onPress={() => setStep('classify')}><Text style={s.btnGhostText}>Rudi</Text></Pressable>
-        </ScrollView>
-      </Bg>
+      <ScrollView style={s.container} contentContainerStyle={{ padding: 24 }}>
+        <Text style={s.heading}>Name the new plant</Text>
+        <TextInput style={s.input} placeholder="Plant name (e.g. Rice Plant C)" placeholderTextColor="#A9B79B" value={name} onChangeText={setName} />
+        <TextInput style={s.input} placeholder="Optional note" placeholderTextColor="#A9B79B" value={note} onChangeText={setNote} />
+        <Pressable style={s.btn} onPress={saveNewPlant}><Text style={s.btnText}>Save Record</Text></Pressable>
+        <Pressable style={[s.btn, s.btnGhost]} onPress={() => setStep('classify')}><Text style={s.btnGhostText}>Back</Text></Pressable>
+      </ScrollView>
     );
   }
 
@@ -177,7 +192,7 @@ export default function CameraScreen() {
 const s = StyleSheet.create({
   center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   muted: { color: '#8A9A7C', fontSize: 14, marginBottom: 12, textAlign: 'center' },
-  heading: { fontSize: 20, fontFamily: fonts.headingBold, color: '#3E5C3A', marginBottom: 18, textAlign: 'center' },
+  heading: { fontSize: 20, fontWeight: '700', color: '#3E5C3A', marginBottom: 18, textAlign: 'center' },
   preview: { flex: 1, margin: 16, borderRadius: 16 },
   row: { flexDirection: 'row', gap: 14, padding: 16 },
   shutterBar: { position: 'absolute', bottom: 40, width: '100%', alignItems: 'center' },
@@ -189,9 +204,8 @@ const s = StyleSheet.create({
   cardTitle: { fontSize: 17, fontFamily: fonts.heading, color: '#3E5C3A' },
   cardSub: { fontSize: 13, color: '#7A8B6F', marginTop: 4 },
   input: { backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: '#DDE6C9', borderRadius: 12, padding: 14, marginBottom: 14, color: '#3E5C3A' },
-  btn: { backgroundColor: '#F6F0DF', paddingVertical: 14, paddingHorizontal: 22, borderRadius: 14, alignItems: 'center', marginTop: 6, flex: 1, borderWidth: 1, borderColor: '#E4D9B8' },
-  btnWide: { backgroundColor: '#F6F0DF', paddingVertical: 14, paddingHorizontal: 22, borderRadius: 14, alignItems: 'center', marginTop: 6, borderWidth: 1, borderColor: '#E4D9B8' },
-  btnGhost: { backgroundColor: '#EAF3DC', borderWidth: 0 },
-  btnText: { color: '#3E5C3A', fontFamily: fonts.bodySemi, fontSize: 15 },
-  btnGhostText: { color: '#3E5C3A', fontFamily: fonts.bodySemi, fontSize: 15 },
+  btn: { backgroundColor: '#7FB069', paddingVertical: 14, paddingHorizontal: 22, borderRadius: 14, alignItems: 'center', marginTop: 6, flex: 1 },
+  btnGhost: { backgroundColor: '#EAF3DC' },
+  btnText: { color: '#FFFFFF', fontWeight: '600', fontSize: 15 },
+  btnGhostText: { color: '#3E5C3A', fontWeight: '600', fontSize: 15 },
 });

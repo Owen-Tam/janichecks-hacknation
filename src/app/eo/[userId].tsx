@@ -1,6 +1,7 @@
 import { Stack, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { Image, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { AdviceReport, DiagnosisLine } from '../../components/AdviceReport';
 import Bg from '../../components/Bg';
 import { FieldUser, getUsers, plantNameFor } from '../../lib/store';
 import { fonts } from '../../lib/theme';
@@ -8,6 +9,7 @@ import { fonts } from '../../lib/theme';
 export default function EoUserReport() {
   const { userId } = useLocalSearchParams<{ userId: string }>();
   const [user, setUser] = useState<FieldUser | null>(null);
+  const [openId, setOpenId] = useState<string | null>(null);
 
   useEffect(() => {
     getUsers().then((all) => setUser(all.find((u) => u.id === userId) ?? null));
@@ -17,6 +19,33 @@ export default function EoUserReport() {
 
   const sent = user.records.filter((r) => r.status === 'sent');
   const confirmed = user.records.filter((r) => r.status === 'confirmed').length;
+  const open = sent.find((r) => r.id === openId) ?? null;
+
+  if (open) {
+    return (
+      <ScrollView style={s.container} contentContainerStyle={{ padding: 20, paddingBottom: 60 }}>
+        <Stack.Screen options={{ title: `${user.name} — Record` }} />
+        {open.imageUri ? (
+          <Image source={{ uri: open.imageUri }} style={s.image} />
+        ) : (
+          <View style={[s.image, s.placeholder]}><Text style={{ fontSize: 30 }}>🌿</Text></View>
+        )}
+        <Text style={s.plantName}>{plantNameFor(user, open.plantId)}</Text>
+        <Text style={s.meta}>{open.date}</Text>
+        {!!open.note && <Text style={s.note}>{open.note}</Text>}
+        <View style={s.reportCard}>
+          {open.diagnosis ? (
+            <AdviceReport label={open.diagnosis.label} status={open.diagnosis.status} date={open.date} />
+          ) : (
+            <Text style={s.muted}>No diagnosis was saved with this record.</Text>
+          )}
+        </View>
+        <Pressable style={s.back} onPress={() => setOpenId(null)}>
+          <Text style={s.backText}>Back to report</Text>
+        </Pressable>
+      </ScrollView>
+    );
+  }
 
   return (
     <Bg>
@@ -69,7 +98,8 @@ const s = StyleSheet.create({
   statLabel: { fontSize: 11, color: '#8A9A7C', marginTop: 2, textAlign: 'center' },
   section: { fontSize: 16, fontFamily: fonts.headingBold, color: '#3E5C3A', marginBottom: 12 },
   muted: { color: '#8A9A7C', fontSize: 14 },
-  card: { backgroundColor: '#F6F0DF', borderRadius: 16, padding: 16, marginBottom: 14, borderWidth: 1, borderColor: '#DDE6C9' },
+  card: { backgroundColor: '#FFFFFF', borderRadius: 16, padding: 16, marginBottom: 14, borderWidth: 1, borderColor: '#DDE6C9' },
+  reportCard: { backgroundColor: '#FFFFFF', borderRadius: 16, padding: 16, marginTop: 14, borderWidth: 1, borderColor: '#DDE6C9' },
   image: { width: '100%', height: 140, borderRadius: 12, marginBottom: 12 },
   placeholder: { backgroundColor: '#EAF3DC', justifyContent: 'center', alignItems: 'center' },
   rowBetween: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },

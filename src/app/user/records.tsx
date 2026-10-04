@@ -1,51 +1,133 @@
-import { Stack, useFocusEffect } from 'expo-router';
-import { useCallback, useState } from 'react';
-import { Alert, Image, ScrollView, StyleSheet, Text, View, Pressable } from 'react-native';
-import Bg from '../../components/Bg';
-import { CURRENT_USER_ID, FieldUser, getUsers, plantNameFor, saveUsers } from '../../lib/store';
-import { fonts } from '../../lib/theme';
+import { Stack, useFocusEffect } from "expo-router";
+import { useCallback, useState } from "react";
+import {
+  Alert,
+  Image,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+  Pressable,
+} from "react-native";
+import { AdviceReport } from "../../components/AdviceReport";
+import Bg from "../../components/Bg";
+import { fonts } from "../../lib/theme";
+
+import {
+  CURRENT_USER_ID,
+  FieldUser,
+  getUsers,
+  plantNameFor,
+  saveUsers,
+} from "../../lib/store";
 
 export default function Records() {
   const [user, setUser] = useState<FieldUser | null>(null);
+  const [openId, setOpenId] = useState<string | null>(null);
 
   useFocusEffect(
     useCallback(() => {
-      getUsers().then((all) => setUser(all.find((u) => u.id === CURRENT_USER_ID) ?? null));
-    }, [])
+      getUsers().then((all) =>
+        setUser(all.find((u) => u.id === CURRENT_USER_ID) ?? null),
+      );
+    }, []),
   );
 
-  async function setStatus(recordId: string, status: 'confirmed' | 'sent') {
+  async function setStatus(recordId: string, status: "confirmed" | "sent") {
     const all = await getUsers();
     const next = all.map((u) =>
       u.id !== CURRENT_USER_ID
         ? u
-        : { ...u, records: u.records.map((r) => (r.id === recordId ? { ...r, status } : r)) }
+        : {
+            ...u,
+            records: u.records.map((r) =>
+              r.id === recordId ? { ...r, status } : r,
+            ),
+          },
     );
     await saveUsers(next);
     setUser(next.find((u) => u.id === CURRENT_USER_ID) ?? null);
-    if (status === 'sent') Alert.alert('Imetumwa ✓', 'Rekodi hii imetumwa kwa Afisa wako wa Ugani.');
+    if (status === "sent")
+      Alert.alert("Imetumwa ✓", "Rekodi hii imetumwa kwa Afisa wako wa Ugani.");
   }
 
-  if (!user) return <Bg><View style={s.center}><Text style={s.muted}>Inapakia…</Text></View></Bg>;
+  if (!user)
+    return (
+      <Bg>
+        <View style={s.center}>
+          <Text style={s.muted}>Inapakia…</Text>
+        </View>
+      </Bg>
+    );
 
   const sorted = [...user.records].sort((a, b) => (a.date < b.date ? 1 : -1));
+  const open = sorted.find((r) => r.id === openId) ?? null;
+
+  if (open) {
+    return (
+      <ScrollView
+        style={s.container}
+        contentContainerStyle={{ padding: 20, paddingBottom: 60 }}
+      >
+        <Stack.Screen options={{ title: "Record" }} />
+        {open.imageUri ? (
+          <Image source={{ uri: open.imageUri }} style={s.image} />
+        ) : (
+          <View style={[s.image, s.placeholder]}>
+            <Text style={{ fontSize: 34 }}>🌿</Text>
+          </View>
+        )}
+        <Text style={s.plantName}>{plantNameFor(user, open.plantId)}</Text>
+        <Text style={s.meta}>{open.date}</Text>
+        {!!open.note && <Text style={s.note}>{open.note}</Text>}
+        <View style={s.reportCard}>
+          {open.diagnosis ? (
+            <AdviceReport
+              label={open.diagnosis.label}
+              status={open.diagnosis.status}
+              date={open.date}
+            />
+          ) : (
+            <Text style={s.muted}>
+              No diagnosis was saved with this record.
+            </Text>
+          )}
+        </View>
+        <RecordActions record={open} onStatus={setStatus} />
+        <Pressable
+          style={[s.btn, s.btnGhost, { marginTop: 12 }]}
+          onPress={() => setOpenId(null)}
+        >
+          <Text style={s.btnGhostText}>Back to records</Text>
+        </Pressable>
+      </ScrollView>
+    );
+  }
 
   return (
-    <Bg>
-      <Stack.Screen options={{ title: 'Rekodi za Awali' }} />
-      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 20, paddingBottom: 60 }}>
-        <Text style={s.heading}>Rekodi za Awali</Text>
-        {sorted.length === 0 && <Text style={s.muted}>Hakuna rekodi bado. Piga picha kuanza.</Text>}
-        {sorted.map((r) => (
-          <View key={r.id} style={s.card}>
-            {r.imageUri ? (
-              <Image source={{ uri: r.imageUri }} style={s.image} />
-            ) : (
-              <View style={[s.image, s.placeholder]}><Text style={{ fontSize: 34 }}>🌿</Text></View>
-            )}
-            <Text style={s.plantName}>{plantNameFor(user, r.plantId)}</Text>
-            <Text style={s.meta}>{r.date}</Text>
-            {!!r.note && <Text style={s.note}>{r.note}</Text>}
+    <ScrollView
+      style={s.container}
+      contentContainerStyle={{ padding: 20, paddingBottom: 60 }}
+    >
+      <Stack.Screen options={{ title: "Previous Records" }} />
+      <Text style={s.heading}>Previous Records</Text>
+      {sorted.length === 0 && (
+        <Text style={s.muted}>
+          No records yet. Take a photo to get started.
+        </Text>
+      )}
+      {sorted.map((r) => (
+        <View key={r.id} style={s.card}>
+          {r.imageUri ? (
+            <Image source={{ uri: r.imageUri }} style={s.image} />
+          ) : (
+            <View style={[s.image, s.placeholder]}>
+              <Text style={{ fontSize: 34 }}>🌿</Text>
+            </View>
+          )}
+          <Text style={s.plantName}>{plantNameFor(user, r.plantId)}</Text>
+          <Text style={s.meta}>{r.date}</Text>
+          {!!r.note && <Text style={s.note}>{r.note}</Text>}
 
             <View style={s.row}>
               {r.status === 'pending' && (

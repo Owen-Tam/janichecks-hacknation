@@ -1,6 +1,12 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import type { LeafStatus } from './leafModel';
 
 export type RecordStatus = 'pending' | 'confirmed' | 'sent';
+
+export type Diagnosis = {
+  label: string;
+  status: LeafStatus;
+};
 
 export type Plant = {
   id: string;
@@ -16,6 +22,7 @@ export type PlantRecord = {
   date: string;
   status: RecordStatus;
   note: string;
+  diagnosis?: Diagnosis;
 };
 
 export type FieldUser = {
