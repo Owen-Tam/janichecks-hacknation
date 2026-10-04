@@ -2,18 +2,20 @@ import { Stack, router, useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import Bg from '../../components/Bg';
+import { storedText, useI18n } from '../../i18n';
 import { FieldUser, getUsers } from '../../lib/store';
 import { fonts } from '../../lib/theme';
 
 export default function EoHome() {
   const [users, setUsers] = useState<FieldUser[]>([]);
+  const { t } = useI18n();
   useFocusEffect(useCallback(() => { getUsers().then(setUsers); }, []));
 
   return (
     <Bg>
-      <Stack.Screen options={{ title: 'Wakulima Wako' }} />
+      <Stack.Screen options={{ title: t('officer.title') }} />
       <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 20 }}>
-        <Text style={s.heading}>Wakulima walio chini yako</Text>
+        <Text style={s.heading}>{t('officer.heading')}</Text>
         {users.map((u) => {
           const sent = u.records.filter((r) => r.status === 'sent').length;
           return (
@@ -21,10 +23,10 @@ export default function EoHome() {
               <View style={s.avatar}><Text style={s.avatarText}>{u.name.split(' ').map((n) => n[0]).join('')}</Text></View>
               <View style={{ flex: 1 }}>
                 <Text style={s.name}>{u.name}</Text>
-                <Text style={s.meta}>{u.village} · {u.crop}</Text>
+                <Text style={s.meta}>{u.village} · {storedText(u.crop, t)}</Text>
               </View>
               <View style={[s.pill, sent > 0 ? s.pillHot : s.pillEmpty]}>
-                <Text style={[s.pillText, sent === 0 && { color: '#3E5C3A' }]}>{sent} zimetumwa</Text>
+                <Text style={[s.pillText, sent === 0 && { color: '#3E5C3A' }]}>{t('officer.sentCount', { count: sent })}</Text>
               </View>
             </Pressable>
           );

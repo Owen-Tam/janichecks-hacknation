@@ -85,6 +85,17 @@ async function preprocess(uri: string): Promise<Float32Array> {
   return out;
 }
 
+export function secondLabel(probs: number[]): string | undefined {
+  const order = probs.map((p, i) => [p, i] as const).sort((a, b) => b[0] - a[0]);
+  const index = order[1]?.[1];
+  return index == null ? undefined : LABELS[index];
+}
+
+export function pairedDisease(status: LeafStatus, also?: string, probs?: number[]): string | undefined {
+  if (status !== 'possibly_multiple') return undefined;
+  return also ?? (probs ? secondLabel(probs) : undefined);
+}
+
 export function statusFor(probs: number[]): LeafStatus {
   const order = probs.map((p, i) => [p, i] as const).sort((a, b) => b[0] - a[0]);
   const [[p1, i1], [p2, i2]] = order;

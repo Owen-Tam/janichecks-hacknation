@@ -41,7 +41,8 @@
         }
       ],
       "onnxruntime-react-native",
-      "expo-asset"
+      "expo-asset",
+      "expo-audio"
     ],
     "scheme": "hacknation"
   }

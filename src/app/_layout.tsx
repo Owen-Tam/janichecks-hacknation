@@ -4,7 +4,12 @@ import { Sora_400Regular, Sora_600SemiBold } from '@expo-google-fonts/sora';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { Text } from 'react-native';
+import { I18nProvider, useI18n } from '../i18n';
 import { fonts } from '../lib/theme';
+
+(Text as { defaultProps?: { style?: object } }).defaultProps = {
+  style: { fontFamily: fonts.body },
+};
 
 export default function RootLayout() {
   const [loaded] = useFonts({
@@ -16,11 +21,15 @@ export default function RootLayout() {
 
   if (!loaded) return null;
 
-  (Text as any).defaultProps = {
-    ...(Text as any).defaultProps,
-    style: { fontFamily: fonts.body },
-  };
+  return (
+    <I18nProvider>
+      <AppStack />
+    </I18nProvider>
+  );
+}
 
+function AppStack() {
+  const { t } = useI18n();
   return (
     <>
       <StatusBar style="dark" />
@@ -30,7 +39,7 @@ export default function RootLayout() {
           headerTintColor: '#3E5C3A',
           headerTitleStyle: { fontFamily: fonts.heading },
           contentStyle: { backgroundColor: '#F3F6E8' },
-          headerBackTitle: 'Nyuma',
+          headerBackTitle: t('common.back'),
           headerBackTitleStyle: { fontFamily: 'Sora_400Regular' },
           headerShadowVisible: false,
         }}

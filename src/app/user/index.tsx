@@ -1,25 +1,27 @@
 import { router, Stack } from 'expo-router';
 import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import Bg from '../../components/Bg';
+import { useI18n } from '../../i18n';
 import { fonts } from '../../lib/theme';
 
 export default function UserHome() {
+  const { t } = useI18n();
   return (
     <Bg>
-      <Stack.Screen options={{ title: 'Mkulima' }} />
+      <Stack.Screen options={{ title: t('farmer.title') }} />
       <View style={s.container}>
-        <Text style={s.heading}>Ungependa kufanya nini?</Text>
+        <Text style={s.heading}>{t('farmer.heading')}</Text>
 
         <Pressable style={s.card} onPress={() => router.push('/user/camera')}>
           <Image source={require('../../../assets/camera.png')} style={s.icon} resizeMode="contain" />
-          <Text style={s.cardTitle}>Piga Picha Mpya</Text>
-          <Text style={s.cardSub}>Tambua mmea na uurekodi</Text>
+          <Text style={s.cardTitle}>{t('farmer.newPhoto')}</Text>
+          <Text style={s.cardSub}>{t('farmer.newPhotoSub')}</Text>
         </Pressable>
 
         <Pressable style={[s.card, s.cardAlt]} onPress={() => router.push('/user/records')}>
           <Image source={require('../../../assets/folder.png')} style={s.icon} resizeMode="contain" />
-          <Text style={s.cardTitle}>Rekodi za Awali</Text>
-          <Text style={s.cardSub}>Kagua na uthibitishe mimea yako</Text>
+          <Text style={s.cardTitle}>{t('farmer.records')}</Text>
+          <Text style={s.cardSub}>{t('farmer.recordsSub')}</Text>
         </Pressable>
       </View>
     </Bg>

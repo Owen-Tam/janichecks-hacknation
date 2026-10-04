@@ -1,25 +1,29 @@
 import { router, Stack } from 'expo-router';
 import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import Bg from '../components/Bg';
+import { LanguageSwitch } from '../components/LanguageSwitch';
+import { useI18n } from '../i18n';
 import { fonts } from '../lib/theme';
 
 export default function Home() {
+  const { t } = useI18n();
   return (
     <Bg>
       <Stack.Screen options={{ title: 'JaniChecks' }} />
       <View style={s.container}>
         <Image source={require('../../assets/logo.png')} style={s.logo} resizeMode="contain" />
-        <Text style={s.subtitle}>Utambuzi wa mimea ya mpunga na kuripoti</Text>
+        <Text style={s.subtitle}>{t('home.subtitle')}</Text>
 
         <Pressable style={s.card} onPress={() => router.push('/user')}>
-          <Text style={s.cardTitle}>Mkulima</Text>
-          <Text style={s.cardSub}>Tambua mimea, weka rekodi, tuma kwa afisa wako</Text>
+          <Text style={s.cardTitle}>{t('home.farmer')}</Text>
+          <Text style={s.cardSub}>{t('home.farmerSub')}</Text>
         </Pressable>
 
         <Pressable style={[s.card, s.cardAlt]} onPress={() => router.push('/eo')}>
-          <Text style={s.cardTitle}>Afisa wa Ugani</Text>
-          <Text style={s.cardSub}>Kagua rekodi zilizotumwa na wakulima wako</Text>
+          <Text style={s.cardTitle}>{t('home.officer')}</Text>
+          <Text style={s.cardSub}>{t('home.officerSub')}</Text>
         </Pressable>
+        <LanguageSwitch />
       </View>
     </Bg>
   );

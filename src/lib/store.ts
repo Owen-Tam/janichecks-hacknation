@@ -6,6 +6,9 @@ export type RecordStatus = 'pending' | 'confirmed' | 'sent';
 export type Diagnosis = {
   label: string;
   status: LeafStatus;
+  /** Second disease when status is possibly_multiple. */
+  also?: string;
+  probs?: number[];
 };
 
 export type Plant = {
@@ -34,43 +37,70 @@ export type FieldUser = {
   records: PlantRecord[];
 };
 
-const KEY = 'hacknation:data:v2';
+const KEY = 'hacknation:data:v3';
+
+const coffee = 'Coffea arabica';
 
 const seed: FieldUser[] = [
   {
     id: 'u1',
-    name: 'Asha Patel',
-    village: 'Kijani',
-    crop: 'Mpunga',
+    name: 'Neema Juma',
+    village: 'Ondera',
+    crop: 'samples.crop',
     plants: [
-      { id: 'p1', name: 'Mmea wa Mpunga A', species: 'Oryza sativa', identifiedAt: '2026-09-12' },
-      { id: 'p2', name: 'Mmea wa Mpunga B', species: 'Oryza sativa', identifiedAt: '2026-09-20' },
+      { id: 'p1', name: 'samples.plants.upper', species: coffee, identifiedAt: '2026-08-16' },
+      { id: 'p2', name: 'samples.plants.shade', species: coffee, identifiedAt: '2026-09-01' },
+      { id: 'p3', name: 'samples.plants.nursery', species: coffee, identifiedAt: '2026-03-02' },
     ],
     records: [
-      { id: 'r1', plantId: 'p1', imageUri: null, date: '2026-09-28', status: 'sent', note: 'Majani yenye afya, kupalilia vizuri.' },
-      { id: 'r2', plantId: 'p2', imageUri: null, date: '2026-09-30', status: 'confirmed', note: 'Majani ya chini yameanza kuwa ya manjano.' },
-      { id: 'r3', plantId: 'p1', imageUri: null, date: '2026-10-02', status: 'pending', note: 'Picha mpya imepigwa leo.' },
+      {
+        id: 'r1', plantId: 'p1', imageUri: 'sample:rust', date: '2026-09-20', status: 'sent',
+        note: 'samples.notes.rust',
+        diagnosis: { label: 'rust', status: 'confident' },
+      },
+      {
+        id: 'r2', plantId: 'p2', imageUri: 'sample:leaf_miner', date: '2026-09-27', status: 'confirmed',
+        note: 'samples.notes.miner',
+        diagnosis: { label: 'leaf_miner', status: 'confident' },
+      },
+      {
+        id: 'r3', plantId: 'p3', imageUri: 'sample:phoma', date: '2026-04-18', status: 'pending',
+        note: 'samples.notes.phoma',
+        diagnosis: { label: 'phoma', status: 'confident' },
+      },
     ],
   },
   {
     id: 'u2',
-    name: 'Bekele Abebe',
-    village: 'Kando ya Mto',
-    crop: 'Mpunga',
+    name: 'Joseph Mwangi',
+    village: 'Kilele',
+    crop: 'samples.crop',
     plants: [
-      { id: 'p3', name: 'Mpunga wa Shamba 1', species: 'Oryza sativa', identifiedAt: '2026-09-05' },
+      { id: 'p4', name: 'samples.plants.valley', species: coffee, identifiedAt: '2026-07-11' },
     ],
     records: [
-      { id: 'r4', plantId: 'p3', imageUri: null, date: '2026-10-01', status: 'sent', note: 'Kuvu ya madoa ya kahawia kumeonekana.' },
+      {
+        id: 'r4', plantId: 'p4', imageUri: 'sample:cercospora', date: '2026-10-01', status: 'sent',
+        note: 'samples.notes.cercospora',
+        diagnosis: { label: 'cercospora', status: 'confident' },
+      },
     ],
   },
   {
     id: 'u3',
-    name: 'Mei Lin',
-    village: 'Kilele',
-    crop: 'Mpunga',
-    plants: [],
-    records: [],
+    name: 'Amina Hassan',
+    village: 'Kando ya Mto',
+    crop: 'samples.crop',
+    plants: [
+      { id: 'p5', name: 'samples.plants.home', species: coffee, identifiedAt: '2026-09-08' },
+    ],
+    records: [
+      {
+        id: 'r5', plantId: 'p5', imageUri: 'sample:healthy', date: '2026-09-14', status: 'sent',
+        note: 'samples.notes.healthy',
+        diagnosis: { label: 'healthy', status: 'confident' },
+      },
+    ],
   },
 ];
 
@@ -97,7 +127,7 @@ export async function updateUser(userId: string, fn: (u: FieldUser) => FieldUser
 }
 
 export function plantNameFor(user: FieldUser, plantId: string): string {
-  return user.plants.find((p) => p.id === plantId)?.name ?? 'Mmea usiojulikana';
+  return user.plants.find((p) => p.id === plantId)?.name ?? 'samples.unknownPlant';
 }
 
 export const CURRENT_USER_ID = 'u1';
