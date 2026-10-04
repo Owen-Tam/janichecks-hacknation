@@ -3,7 +3,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { router, Stack } from 'expo-router';
 import { useRef, useState } from 'react';
 import {
-  ActivityIndicator, Alert, Image, Pressable, ScrollView, StyleSheet, Text, TextInput, View,
+  ActivityIndicator, Alert, Image, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View,
 } from 'react-native';
 import { AdviceReport } from '../../components/AdviceReport';
 import { storedText, useI18n } from '../../i18n';
@@ -65,7 +65,10 @@ export default function CameraScreen() {
   async function pickFromLibrary() {
     const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!perm.granted) {
-      Alert.alert(t('camera.permissionTitle'), t('camera.permissionBody'));
+      const title = t('camera.permissionTitle');
+      const body = t('camera.permissionBody');
+      if (Platform.OS === 'web') window.alert(`${title}\n\n${body}`);
+      else Alert.alert(title, body);
       return;
     }
     const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images'], quality: 0.7 });
@@ -73,7 +76,9 @@ export default function CameraScreen() {
   }
 
   async function takePhoto() {
-    const pic = await camRef.current?.takePictureAsync({ quality: 0.7 });
+    const pic = await camRef.current?.takePictureAsync(
+      Platform.OS === 'web' ? { quality: 0.7, imageType: 'jpg' } : { quality: 0.7 },
+    );
     if (pic) showPreview(pic.uri);
   }
 
@@ -102,6 +107,12 @@ export default function CameraScreen() {
   }
 
   function done() {
+    // react-native-web's Alert.alert is a no-op, so the plant cards looked dead.
+    if (Platform.OS === 'web') {
+      window.alert(`${t('camera.savedTitle')}\n\n${t('camera.savedBody')}`);
+      router.replace('/user/records');
+      return;
+    }
     Alert.alert(t('camera.savedTitle'), t('camera.savedBody'), [
       { text: t('common.ok'), onPress: () => router.replace('/user/records') },
     ]);

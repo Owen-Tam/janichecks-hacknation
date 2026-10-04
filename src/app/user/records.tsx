@@ -3,6 +3,7 @@ import { useCallback, useState } from "react";
 import {
   Alert,
   Image,
+  Platform,
   ScrollView,
   StyleSheet,
   Text,
@@ -51,8 +52,12 @@ export default function Records() {
     );
     await saveUsers(next);
     setUser(next.find((u) => u.id === CURRENT_USER_ID) ?? null);
-    if (status === "sent")
-      Alert.alert(t("records.sentTitle"), t("records.sentBody"));
+    if (status === "sent") {
+      const title = t("records.sentTitle");
+      const body = t("records.sentBody");
+      if (Platform.OS === "web") window.alert(`${title}\n\n${body}`);
+      else Alert.alert(title, body);
+    }
   }
 
   if (!user)

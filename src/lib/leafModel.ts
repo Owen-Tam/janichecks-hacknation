@@ -2,9 +2,11 @@ import { Asset } from 'expo-asset';
 import { ImageManipulator, SaveFormat } from 'expo-image-manipulator';
 import { decode } from 'jpeg-js';
 import { InferenceSession, Tensor } from 'onnxruntime-react-native';
-import labelMap from '../../assets/model/labels.json';
 import modelAsset from '../../assets/model/leaf_model.onnx';
-import thresholds from '../../assets/model/thresholds.json';
+import { LABELS, statusFor, type LeafPrediction } from './leafShared';
+
+export { LABELS, pairedDisease, secondLabel, statusFor } from './leafShared';
+export type { LeafPrediction, LeafStatus } from './leafShared';
 
 // Must match ml/export/preprocess.json.
 const SIZE = 256;
@@ -12,21 +14,6 @@ const MEAN = [0.485, 0.456, 0.406];
 const STD = [0.229, 0.224, 0.225];
 const INPUT = 'image';
 const OUTPUT = 'probs';
-
-export const LABELS: string[] = Object.keys(labelMap)
-  .sort((a, b) => Number(a) - Number(b))
-  .map((k) => (labelMap as Record<string, string>)[k]);
-
-export type LeafStatus = 'confident' | 'possibly_multiple' | 'not_sure';
-
-export type LeafPrediction = {
-  probs: number[];
-  top: number;
-  label: string;
-  status: LeafStatus;
-  /** Preprocessing + inference time. */
-  ms: number;
-};
 
 let sessionPromise: Promise<InferenceSession> | null = null;
 
@@ -83,27 +70,6 @@ async function preprocess(uri: string): Promise<Float32Array> {
     }
   }
   return out;
-}
-
-export function secondLabel(probs: number[]): string | undefined {
-  const order = probs.map((p, i) => [p, i] as const).sort((a, b) => b[0] - a[0]);
-  const index = order[1]?.[1];
-  return index == null ? undefined : LABELS[index];
-}
-
-export function pairedDisease(status: LeafStatus, also?: string, probs?: number[]): string | undefined {
-  if (status !== 'possibly_multiple') return undefined;
-  return also ?? (probs ? secondLabel(probs) : undefined);
-}
-
-export function statusFor(probs: number[]): LeafStatus {
-  const order = probs.map((p, i) => [p, i] as const).sort((a, b) => b[0] - a[0]);
-  const [[p1, i1], [p2, i2]] = order;
-  if (p1 >= thresholds.min_conf) return 'confident';
-  if (i1 !== 0 && i2 !== 0 && p2 >= thresholds.multi_conf && p1 + p2 >= thresholds.min_conf) {
-    return 'possibly_multiple';
-  }
-  return 'not_sure';
 }
 
 export async function classifyLeaf(uri: string): Promise<LeafPrediction> {
